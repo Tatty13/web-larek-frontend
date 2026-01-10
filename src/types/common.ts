@@ -1,6 +1,6 @@
-export type Id = string;
+export type ProductId = string;
 
-export type PaymentType = 'online' | 'uponReceipt';
+export type PaymentType = 'card' | 'cash';
 
 export type Contacts = {
 	phone: string;
@@ -8,7 +8,7 @@ export type Contacts = {
 };
 
 export type Product = {
-	id: Id;
+	id: ProductId;
 	description: string;
 	image: string;
 	title: string;
@@ -16,9 +16,11 @@ export type Product = {
 	price: number | null;
 };
 
-export type Order = Contacts & {
+export type CartProduct = Product & {
+	productIndex: number;
+};
+
+export type Order = {
 	payment: PaymentType;
 	address: string;
-	total: number;
-	items: string[];
 };

@@ -1,7 +1,8 @@
 export const enum Cart {
-	remove = 'ui:cart-remove',
-	add = 'ui:cart-add',
+	remove = 'cart:remove',
+	add = 'cart:add',
 	change = 'cart:change',
+	open = 'cart:open',
 }
 
 export const enum Catalog {
@@ -9,14 +10,24 @@ export const enum Catalog {
 }
 
 export const enum Product {
-	getDetails = 'UI:product-get-details',
+	getDetails = 'product:get-details',
 }
 
 export const enum Modal {
-	open = 'modal: open',
-	close = 'modal: close',
+	open = 'modal:open',
+	close = 'modal:close',
 }
 
 export const enum Order {
+	create = 'order:create',
+	change = 'order:change',
+	setValue = 'order:setValue',
 	submit = 'order:submit',
+	finish = 'order:finish',
+}
+
+export const enum Contacts {
+	change = 'contacts:change',
+	setValue = 'contacts:setValue',
+	submit = 'contacts:submit',
 }
