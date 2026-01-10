@@ -57,7 +57,6 @@ export interface IFormData<DataType> {
 
 export interface IOrderFormView {
 	payment: PaymentType;
-	togglePaymentBtns(payment: Order['payment']): void;
 }
 
 export interface IOrderFormViewData extends IFormData<Pick<Order, 'address'>> {

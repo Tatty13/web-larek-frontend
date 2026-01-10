@@ -3,7 +3,7 @@ import { CartProduct } from '../../types/common';
 import { IProductCartView } from '../../types/view';
 
 import { IEvents } from '../base/events';
-import { ProductView } from './productView';
+import { ProductView } from './product';
 
 export class ProductCartView
 	extends ProductView<CartProduct>

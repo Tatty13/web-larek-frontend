@@ -23,7 +23,7 @@ export class CartView extends BaseView<ICartViewData> implements ICartView {
 		});
 	}
 
-	_getPriceText(price: number | null) {
+	protected _getPriceText(price: number | null): string {
 		if (!price) {
 			return '';
 		}

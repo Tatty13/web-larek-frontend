@@ -17,7 +17,7 @@ export abstract class BaseView<DataType> implements IView<DataType> {
 		element.setAttribute('hidden', 'true');
 	}
 
-	protected _isDisabled(element: HTMLElement) {
+	protected _isDisabled(element: HTMLElement): boolean {
 		return element.hasAttribute('disabled');
 	}
 

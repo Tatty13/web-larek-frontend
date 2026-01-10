@@ -11,19 +11,19 @@ export class CartModel implements ICartModel {
 
 	constructor(protected events: IEvents) {}
 
-	get totalPrice() {
+	get totalPrice(): number {
 		return this._totalPrice;
 	}
 
-	get itemsCount() {
+	get itemsCount(): number {
 		return this._itemsCount;
 	}
 
-	get itemsIds() {
+	get itemsIds(): ProductId[] {
 		return Array.from(this._items.keys());
 	}
 
-	isItemInCart(id: ProductId) {
+	isItemInCart(id: ProductId): boolean {
 		return this._items.has(id);
 	}
 

@@ -39,12 +39,8 @@ export class OrderFormView
 	}
 
 	set payment(value: PaymentType) {
-		this.togglePaymentBtns(value);
-	}
-
-	togglePaymentBtns(payment: PaymentType) {
 		this._paymentBtns.forEach((button) => {
-			if (button.name === payment) {
+			if (button.name === value) {
 				button.classList.add('button_alt-active');
 			} else {
 				button.classList.remove('button_alt-active');

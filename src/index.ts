@@ -166,7 +166,7 @@ events.on(EventTypes.Order.create, () => {
 events.on<Partial<Order>>(EventTypes.Order.setValue, (order) => {
 	orderModel.orderDetails = order;
 	if (order.payment) {
-		orderView.togglePaymentBtns(order.payment);
+		orderView.payment = order.payment;
 	}
 });
 

@@ -2,7 +2,7 @@ import * as EventTypes from '../../types/event';
 import { Product } from '../../types/common';
 
 import { IEvents } from '../base/events';
-import { ProductView } from './productView';
+import { ProductView } from './product';
 
 export class ProductGalleryView extends ProductView<Product> {
 	constructor(element: HTMLElement, events: IEvents) {

@@ -26,7 +26,7 @@ export class ContactsModel implements IContactsModel {
 		return this._contacts;
 	}
 
-	get errorMessage() {
+	get errorMessage(): string {
 		if (!this._contacts.email) {
 			return 'Введите email';
 		}
@@ -42,17 +42,17 @@ export class ContactsModel implements IContactsModel {
 		return '';
 	}
 
-	get isValidContacts() {
+	get isValidContacts(): boolean {
 		return this.isValidateEmail && this.isValidPhone;
 	}
 
-	get isValidateEmail() {
+	get isValidateEmail(): boolean {
 		return Boolean(
 			this._contacts.email && EMAIL_REGEXP.test(this._contacts.email)
 		);
 	}
 
-	get isValidPhone() {
+	get isValidPhone(): boolean {
 		return Boolean(
 			this._contacts.phone && PHONE_REGEXP.test(this._contacts.phone)
 		);

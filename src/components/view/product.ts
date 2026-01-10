@@ -28,7 +28,7 @@ export class ProductView<DataType>
 		this._actionBtn = this.element.querySelector('.card__button');
 	}
 
-	_getPriceText(price: number | null) {
+	protected _getPriceText(price: number | null): string {
 		if (price === null) {
 			return 'Бесценно';
 		}

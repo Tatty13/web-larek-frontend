@@ -25,13 +25,13 @@ export class OrderModel implements IOrderModel {
 		return this._orderDetails;
 	}
 
-	get isValidOrder() {
+	get isValidOrder(): boolean {
 		return (
 			Boolean(this._orderDetails.payment) && Boolean(this._orderDetails.address)
 		);
 	}
 
-	get errorMessage() {
+	get errorMessage(): string {
 		if (!this._orderDetails.address) {
 			return 'Введите адрес доставки';
 		}

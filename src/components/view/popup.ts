@@ -23,23 +23,23 @@ export class PopupView extends BaseView<IPopupViewData> implements IPopupView {
 		this._modalContent.replaceChildren(value);
 	}
 
-	_handleEscClose(evt: KeyboardEvent) {
+	protected _handleEscClose(evt: KeyboardEvent) {
 		if (evt.code === 'Escape') this.close();
 	}
 
-	_handleOverlayClose(evt: MouseEvent) {
+	protected _handleOverlayClose(evt: MouseEvent) {
 		if (evt.target === this.element) {
 			this.close();
 		}
 	}
 
-	_setListeners() {
+	protected _setListeners() {
 		this._closeBtn.addEventListener('click', this.close);
 		this.element.addEventListener('mousedown', this._handleOverlayClose);
 		document.addEventListener('keydown', this._handleEscClose);
 	}
 
-	_removeListeners() {
+	protected _removeListeners() {
 		this._closeBtn.removeEventListener('click', this.close);
 		this.element.removeEventListener('mousedown', this._handleOverlayClose);
 		document.removeEventListener('keydown', this._handleEscClose);
