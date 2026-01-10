@@ -41,6 +41,7 @@
     "start": "webpack serve",
     "lint": "eslint --ext .js,.ts ./src",
     "lint:fix": "npm run lint -- --fix",
+    "typecheck": "tsc --watch --noEmit ",
     "format": "prettier ./src --write",
     "deploy": "gh-pages -d dist"
   }
