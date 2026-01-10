@@ -1,0 +1,12 @@
+export { CartCounter } from './cartCounter';
+export { CartView } from './cartView';
+export { CatalogView } from './catalogView';
+export { ContactsFormView } from './contactsForm';
+export { MainPage } from './mainPage';
+export { OrderFormView } from './orderForm';
+export { PopupView } from './popup';
+export { ProductCartView } from './productCartView';
+export { ProductGalleryView } from './productGallery';
+export { ProductPreview } from './productPreview';
+export { ProductView } from './productView';
+export { SuccessView } from './success';
