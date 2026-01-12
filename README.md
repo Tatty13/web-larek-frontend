@@ -85,7 +85,57 @@ yarn build
 
 ## Архитектура приложения
 
-Приложение построено на основе паттерна MVP (Model-View-Presenter)
+Приложение построено на основе паттерна **MVP** (Model-View-Presenter) с **event-driven** взаимодействием: вместо прямых зависимостей компоненты **Model** и **View** общаются через **брокер событий** `EventEmitter`, что снижает связанность и упрощает расширение функциональности.
+
+**Модели** (Model) отвечают за управление данными приложения и бизнес-логикой, хранят актуальное состояние (список товаров, содержимое корзины, контакты, данные заказа), сообщают об изменениях в данных.
+
+**Представления** (View) отвечают за отображение данных пользователю. Ничего не знают про бизнес-логику, сообщают о действиях пользователя.
+
+**Презентер** (обработчики событий в index.ts) управляет сценариями и связывает модель и представление (слушает события от View и от Model, принимает решения "что сделать дальше"). Он отвечает за обработку пользовательского ввода, обновление модели и обновление представления на основе изменений в модели с выполнением промежуточных вычислений при необходимости.
+
+---
+
+## Пользовательские сценарии
+
+### Открыть карточку товара (превью)
+
+- Пользователь кликает по карточке в галерее → `ProductGalleryView` генерирует событие `product:get-details`.
+- Presenter ловит событие `product:get-details` → получает данные о товаре из модели каталога → проверяет наличие товара в корзине → передаёт данные для отрисовки в `ProductPreview` → открывает компонент `ProductPreview` в модальном окне
+
+### Добавить товар в корзину
+
+- Пользователь кликает по кнопке добавления товара в корзину в `ProductPreview` → `ProductPreview` генерирует событие `cart:add`
+- Presenter ловит событие `cart:add` → получает данные о товаре из модели каталога → обновляет данные в модели корзины
+- Модель корзины генерирует событие `cart:change`
+- Presenter ловит событие `cart:change` → обновляет представление счётчика корзины
+
+### Удалить товар из корзины
+
+- Пользователь кликает по иконке корзины в хэдере (счётчику корзины) → счётчик корзины генерирует событие `cart:open`
+- Presenter ловит событие `cart:open` → сопоставляет данные в модели корзины с данными в модели каталога товаров → создаёт список представлений товаров для корзины (`ProductCartView`) → передаёт полученный список в `CartView` → рендерит `CartView` в модальном окне
+- Пользователь кликает по иконке удаления товара → `ProductCartView` генерирует событие `cart:remove`
+- Presenter ловит событие `cart:remove` → получает данные о товаре из модели каталога → удаляет товар из модели корзины → обновляет представление `СartView`
+- Модель корзины генерирует событие `cart:change`
+- Presenter ловит событие `cart:change` → обновляет представление счётчика корзины → обновляет отображение кнопки оформления заказа в представлении корзины
+
+### Оформить заказ
+
+- Пользователь кликает по иконке корзины в хэдере (счётчику корзины) → счётчик корзины генерирует событие `cart:open`
+- Presenter ловит событие `cart:open` → сопоставляет данные в модели корзины с данными в модели каталога товаров → создаёт список представлений товаров для корзины (`ProductCartView`) → передаёт полученный список в `CartView` → рендерит `CartView` в модальном окне
+- Пользователь кликает по кнопке оформления заказа → `CartView` генерирует событие `order:create`
+- Presenter ловит событие `order:create` → получает начальные значения из модели заказа → рендерит `OrderFormView` в модальном окне
+- Пользователь вводит данные в поле "Адрес"/ кликает по кнопкам выбора способы оплаты → `OrderFormView` генерирует событие `order:setValue`
+- Presenter ловит событие `order:setValue` → обновляет данные в модели заказа → при необходимости обновляет представление `OrderFormView` → модель заказа генерирует событие `order:change`
+- Presenter ловит событие `order:change` → модель заказа проверяет валидность введённых пользователем данных → обновляет представление `OrderFormView` (дизейблит дальнейший шаг / отображает текст ошибки, полученный из модели заказа)
+- При валидных данных пользователь кликает по кнопке ввода контактных данных → `OrderFormView` генерирует событие `order:submit`
+- Presenter ловит событие `order:submit` → получает начальные данные из модели контактов → рендерит `ContactsFormView` в модальном окне
+- Пользователь вводит данные в поля "email"/"телефон" → `ContactsFormView` генерирует событие `contacts:setValue`
+- Presenter ловит событие `contacts:setValue` → обновляет данные в модели контактов → модель контактов генерирует событие `contacts:change`
+- Presenter ловит событие `contacts:change` → модель контактов проверяет валидность введённых пользователем данных → обновляет представление `ContactsFormView` (дизейблит дальнейший шаг / отображает текст ошибки, полученный из модели контактов)
+- При валидных данных пользователь кликает по кнопке завершения заказа → `ContactsFormView` генерирует событие `contacts:submit`
+- Presenter ловит событие `contacts:submit` → собирает данные для запроса `WebLarekApi.createOrder` из моделей заказа, контактов и корзины → в случае успешного завершения запроса отображает `SuccessView` в модальном окне (иначе закрывает модальное окно) → сбрасывает состояния в моделях заказа, контактов и корзины
+- Пользователь кликает по кнопке "За новыми покупками!" в `SuccessView` → `SuccessView` генерирует событие `order:finish`
+- Presenter ловит событие `order:finish` → закрывает модальное окно
 
 ---
 
@@ -227,8 +277,6 @@ yarn build
 
 ## Модели
 
-Модель отвечает за управление данными приложения и бизнес-логикой, хранит актуальное состояние, сообщает об изменениях в данных.
-
 ---
 
 ### `CatalogModel`
@@ -350,8 +398,6 @@ yarn build
 ---
 
 ## Представление
-
-Представления отвечают за отображение данных пользователю. Ничего не знают про бизнес-логику, сообщают о действиях пользователя.
 
 ---
 
@@ -629,12 +675,6 @@ yarn build
 
 ---
 
-## Презентер
-
-Презентер связывает модель и представление на основе брокера событий. Он отвечает за обработку пользовательского ввода, обновление модели и обновление представления на основе изменений в модели.
-
----
-
 ## События
 
 `cart:remove` - удаление товара из корзины
@@ -669,26 +709,26 @@ export type ProductId = string;
 export type PaymentType = 'card' | 'cash';
 
 export type Contacts = {
-  phone: string;
-  email: string;
+	phone: string;
+	email: string;
 };
 
 export type Product = {
-  id: ProductId;
-  description: string;
-  image: string;
-  title: string;
-  category: string;
-  price: number | null;
+	id: ProductId;
+	description: string;
+	image: string;
+	title: string;
+	category: string;
+	price: number | null;
 };
 
 export type CartProduct = Product & {
-  productIndex: number;
+	productIndex: number;
 };
 
 export type Order = {
-  payment: PaymentType;
-  address: string;
+	payment: PaymentType;
+	address: string;
 };
 ```
 
@@ -696,36 +736,36 @@ export type Order = {
 
 ```typescript
 export interface ICatalogModel {
-  setItems(items: Product[]): void;
-  getProduct(id: ProductId): Product;
+	setItems(items: Product[]): void;
+	getProduct(id: ProductId): Product;
 }
 
 export interface ICartModel {
-  add(id: ProductId, price: number): void;
-  remove(id: ProductId, price: number): void;
-  isItemInCart(id: ProductId): boolean;
-  reset(): void;
+	add(id: ProductId, price: number): void;
+	remove(id: ProductId, price: number): void;
+	isItemInCart(id: ProductId): boolean;
+	reset(): void;
 }
 
 export interface IUserModel {
-  address: string;
-  contacts: Contacts;
+	address: string;
+	contacts: Contacts;
 }
 
 export interface IContactsModel {
-  contacts: Contacts;
-  errorMessage: string;
-  isValidContacts: boolean;
-  isValidPhone: boolean;
-  isValidateEmail: boolean;
-  reset(): void;
+	contacts: Contacts;
+	errorMessage: string;
+	isValidContacts: boolean;
+	isValidPhone: boolean;
+	isValidateEmail: boolean;
+	reset(): void;
 }
 
 export interface IOrderModel {
-  orderDetails: Order;
-  isValidOrder: boolean;
-  errorMessage: string;
-  reset(): void;
+	orderDetails: Order;
+	isValidOrder: boolean;
+	errorMessage: string;
+	reset(): void;
 }
 ```
 
@@ -733,95 +773,95 @@ export interface IOrderModel {
 
 ```typescript
 export interface IView<DataType> {
-  render(data?: DataType): HTMLElement;
+	render(data?: DataType): HTMLElement;
 }
 
 export interface IMainPage {
-  isLocked: boolean;
+	isLocked: boolean;
 }
 
 export interface IMainPageData {
-  isLocked: boolean;
+	isLocked: boolean;
 }
 
 export interface ICatalogView {
-  updateContent(elements: HTMLElement[]): void;
+	updateContent(elements: HTMLElement[]): void;
 }
 
 export interface IProductView {
-  id: ProductId;
-  image: string;
-  title: string;
-  category: string;
-  description: string;
-  price: number;
+	id: ProductId;
+	image: string;
+	title: string;
+	category: string;
+	description: string;
+	price: number;
 }
 
 export interface IProductCartView {
-  productIndex: number;
+	productIndex: number;
 }
 
 export interface IProductPreview {
-  setIsDisabledAddBtn(disabled: boolean): void;
+	setIsDisabledAddBtn(disabled: boolean): void;
 }
 
 export interface IPopupView {
-  content: HTMLElement;
-  open(): void;
-  close(): void;
+	content: HTMLElement;
+	open(): void;
+	close(): void;
 }
 
 export interface IPopupViewData {
-  content: HTMLElement;
+	content: HTMLElement;
 }
 
 export interface IForm<
-  DataType extends { inputValues: Record<string, string> }
+	DataType extends { inputValues: Record<string, string> }
 > {
-  inputValues: DataType['inputValues'];
-  errors: string;
-  setIsDisabledSubmitBtn(disabled: boolean): void;
+	inputValues: DataType['inputValues'];
+	errors: string;
+	setIsDisabledSubmitBtn(disabled: boolean): void;
 }
 
 export interface IFormData<DataType> {
-  inputValues: DataType;
+	inputValues: DataType;
 }
 
 export interface IOrderFormView {
-  payment: PaymentType;
+	payment: PaymentType;
 }
 
 export interface IOrderFormViewData extends IFormData<Pick<Order, 'address'>> {
-  payment: PaymentType;
+	payment: PaymentType;
 }
 
 export interface IContactsFormViewData extends IFormData<Contacts> {
-  inputValues: Contacts;
+	inputValues: Contacts;
 }
 
 export interface ICartCounter {
-  count: number;
+	count: number;
 }
 
 export interface ICartCounterData {
-  count: number;
+	count: number;
 }
 
 export interface ICartView extends ICartViewData {
-  setIsDisabledOrderBtn(disabled: boolean): void;
+	setIsDisabledOrderBtn(disabled: boolean): void;
 }
 
 export interface ICartViewData {
-  cartItems: HTMLElement[];
-  totalPrice: number;
+	cartItems: HTMLElement[];
+	totalPrice: number;
 }
 
 export interface ISuccess {
-  totalPrice: number;
+	totalPrice: number;
 }
 
 export interface ISuccessData {
-  totalPrice: number;
+	totalPrice: number;
 }
 ```
 
@@ -829,22 +869,22 @@ export interface ISuccessData {
 
 ```typescript
 export type CreateOrderRequest = {
-  payment: PaymentType;
-  email: string;
-  phone: string;
-  address: string;
-  total: number;
-  items: ProductId[];
+	payment: PaymentType;
+	email: string;
+	phone: string;
+	address: string;
+	total: number;
+	items: ProductId[];
 };
 
 export type CreateOrderResponse = {
-  id: string;
-  total: number;
+	id: string;
+	total: number;
 };
 
 export interface IWebLarekApi {
-  getProductById: (id: Product['id']) => Promise<Product>;
-  getProductList: () => Promise<Product[]>;
-  createOrder: (order: CreateOrderRequest) => Promise<CreateOrderResponse>;
+	getProductById: (id: Product['id']) => Promise<Product>;
+	getProductList: () => Promise<Product[]>;
+	createOrder: (order: CreateOrderRequest) => Promise<CreateOrderResponse>;
 }
 ```
