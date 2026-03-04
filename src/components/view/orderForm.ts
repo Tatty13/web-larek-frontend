@@ -11,7 +11,7 @@ export class OrderFormView
 {
 	protected _paymentBtns: NodeListOf<HTMLButtonElement>;
 
-	constructor(protected element: HTMLFormElement, protected events?: IEvents) {
+	constructor(element: HTMLFormElement, events?: IEvents) {
 		super(element, events);
 
 		this._paymentBtns = element.querySelectorAll('.button_alt');
@@ -40,11 +40,7 @@ export class OrderFormView
 
 	set payment(value: PaymentType) {
 		this._paymentBtns.forEach((button) => {
-			if (button.name === value) {
-				button.classList.add('button_alt-active');
-			} else {
-				button.classList.remove('button_alt-active');
-			}
+			button.classList.toggle('button_alt-active', button.name === value);
 		});
 	}
 }

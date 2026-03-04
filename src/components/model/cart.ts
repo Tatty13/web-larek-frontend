@@ -5,9 +5,8 @@ import { ICartModel } from '../../types/model';
 import { IEvents } from '../base/events';
 
 export class CartModel implements ICartModel {
-	protected _items: Map<ProductId, number> = new Map();
+	protected _items: ProductId[] = [];
 	protected _totalPrice = 0;
-	protected _itemsCount = 0;
 
 	constructor(protected events: IEvents) {}
 
@@ -16,49 +15,39 @@ export class CartModel implements ICartModel {
 	}
 
 	get itemsCount(): number {
-		return this._itemsCount;
+		return this._items.length;
 	}
 
 	get itemsIds(): ProductId[] {
-		return Array.from(this._items.keys());
+		return this._items;
 	}
 
 	isItemInCart(id: ProductId): boolean {
-		return this._items.has(id);
+		return this._items.includes(id);
 	}
 
 	add(id: ProductId, price: number) {
-		if (!this._items.has(id)) this._items.set(id, 0);
-		this._items.set(id, this._items.get(id) + 1);
+		if (this.isItemInCart(id)) return;
+		this._items.push(id);
 		this._totalPrice += price;
-		this._itemsCount++;
-		this.#changed();
+		this._changed();
 	}
 
 	remove(id: ProductId, price: number) {
-		if (!this._items.has(id)) return;
-		const amount = this._items.get(id);
-		if (amount === 1) {
-			this._items.delete(id);
-		} else {
-			this._items.set(id, amount - 1);
-		}
+		this._items = this._items.filter((itemId) => itemId !== id);
 		this._totalPrice -= price;
-		this._itemsCount--;
-		this.#changed();
+		this._changed();
 	}
 
 	reset() {
-		this._items = new Map();
+		this._items = [];
 		this._totalPrice = 0;
-		this._itemsCount = 0;
-
-		this.#changed();
+		this._changed();
 	}
 
-	#changed() {
+	private _changed() {
 		this.events.emit(EventTypes.Cart.change, {
-			items: Array.from(this._items.keys()),
+			items: this._items,
 		});
 	}
 }

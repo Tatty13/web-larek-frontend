@@ -1,15 +1,11 @@
-import * as EventTypes from '../../types/event';
 import { Product } from '../../types/common';
 
-import { IEvents } from '../base/events';
-import { ProductView } from './product';
+import { ProductExtendedView } from './productExtended';
 
-export class ProductGalleryView extends ProductView<Product> {
-	constructor(element: HTMLElement, events: IEvents) {
-		super(element, events);
+export class ProductGalleryView extends ProductExtendedView<Product> {
+	constructor(element: HTMLElement, protected onClick: () => void) {
+		super(element);
 
-		this.element.addEventListener('click', () => {
-			this.events.emit(EventTypes.Product.getDetails, { id: this._id });
-		});
+		this.element.addEventListener('click', onClick);
 	}
 }

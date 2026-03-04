@@ -1,21 +1,25 @@
-import * as EventTypes from '../../types/event';
 import { Product } from '../../types/common';
 import { IProductPreview } from '../../types/view';
 
 import { IEvents } from '../base/events';
-import { ProductView } from './product';
+import { ProductExtendedView } from './productExtended';
 
 export class ProductPreview
-	extends ProductView<Product>
+	extends ProductExtendedView<Product>
 	implements IProductPreview
 {
+	protected _cardText: HTMLElement;
+	protected _actionBtn: HTMLButtonElement;
+	private _addToCartCallback: () => void;
+
 	constructor(element: HTMLElement, events: IEvents) {
 		super(element, events);
 
-		this._actionBtn.addEventListener('click', () => {
-			this.events.emit(EventTypes.Cart.add, { id: this._id });
-			this.setIsDisabledAddBtn(true);
-		});
+		this._cardText = this.element.querySelector('.card__text');
+		this._actionBtn = this.element.querySelector('.card__button');
+
+		this.handleAddToCart = this.handleAddToCart.bind(this);
+		this._actionBtn.addEventListener('click', this.handleAddToCart);
 	}
 
 	set price(value: number) {
@@ -23,6 +27,21 @@ export class ProductPreview
 			this.setIsDisabledAddBtn(true);
 		}
 		super.price = value;
+	}
+
+	set description(value: string) {
+		this.setText(this._cardText, value);
+	}
+
+	setAddToCartCallback(callback: () => void) {
+		this._addToCartCallback = callback;
+	}
+
+	private handleAddToCart() {
+		if (this._addToCartCallback) {
+			this._addToCartCallback();
+			this.setIsDisabledAddBtn(true);
+		}
 	}
 
 	setIsDisabledAddBtn(disabled: boolean) {

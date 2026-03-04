@@ -1,8 +1,6 @@
-import * as EventTypes from '../../types/event';
 import { CartProduct } from '../../types/common';
 import { IProductCartView } from '../../types/view';
 
-import { IEvents } from '../base/events';
 import { ProductView } from './product';
 
 export class ProductCartView
@@ -10,15 +8,15 @@ export class ProductCartView
 	implements IProductCartView
 {
 	protected _productIndex: HTMLElement;
+	protected _actionBtn: HTMLButtonElement;
 
-	constructor(element: HTMLElement, events: IEvents) {
-		super(element, events);
+	constructor(element: HTMLElement, protected onDelete: () => void) {
+		super(element);
 
 		this._productIndex = element.querySelector('.basket__item-index');
+		this._actionBtn = this.element.querySelector('.card__button');
 
-		this._actionBtn.addEventListener('click', () => {
-			this.events.emit(EventTypes.Cart.remove, { id: this._id });
-		});
+		this._actionBtn.addEventListener('click', onDelete);
 	}
 
 	set productIndex(value: number) {

@@ -80,7 +80,7 @@ export abstract class BaseView<DataType> implements IView<DataType> {
 		element.setAttribute(attributeName, String(attributeValue));
 	}
 
-	render(data: Partial<DataType>): HTMLElement {
+	render(data?: Partial<DataType>): HTMLElement {
 		if (typeof data === 'object') {
 			Object.assign(this, data ?? {});
 		}

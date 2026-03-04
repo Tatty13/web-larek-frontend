@@ -196,7 +196,7 @@ yarn build
 
 Методы:
 
-- `render(data: Partial<DataType>): HTMLElement` - возвращает HTML элемент, устанавливая переданные данные как поля класса
+- `render(data?: Partial<DataType>): HTMLElement` - возвращает HTML элемент, устанавливая переданные данные как поля класса
 
 - `protected showElement(element: HTMLElement)` - удаляет атрибут `hidden` у элемента, переданного в аргументе
 
@@ -295,9 +295,9 @@ yarn build
 
 - `setItems(items: Product[])` - принимает список продуктов и сохраняет его
 
-- `getProduct(id: ProductId): Product` -возвращает продукт по его идентификатору
+- `getProduct(id: ProductId): Product | nul` -возвращает продукт по его идентификатору
 
-- `#changed()` - создаёт событие `catalog:change`, уведомляющее об изменении состояния модели.
+- `_changed()` - создаёт событие `catalog:change`, уведомляющее об изменении состояния модели.
 
 ---
 
@@ -311,11 +311,9 @@ yarn build
 
 Поля:
 
-- `protected _items: Map<ProductId, number> = new Map();` - хранит данные о добавленных продуктах в корзину
+- `protected _items: ProductId[] = [];` - хранит данные о добавленных продуктах в корзину
 
 - `protected _totalPrice = 0` - хранит общую стоимость товаров в корзине
-
-- `protected _itemsCount = 0` - хранит общее количество товаров, добавленных в корзину
 
 Методы:
 
@@ -333,7 +331,7 @@ yarn build
 
 - `reset()` - очищает корзину
 
-- `#changed()` - создаёт событие `cart:change`, уведомляющее об изменении состояния модели.
+- `_changed()` - создаёт событие `cart:change`, уведомляющее об изменении состояния модели.
 
 ---
 
@@ -365,7 +363,7 @@ yarn build
 
 - `reset()` - очищает данные `_contacts`
 
-- `#changed()` - создаёт событие `contacts:change`, уведомляющее об изменении состояния модели.
+- `_changed()` - создаёт событие `contacts:change`, уведомляющее об изменении состояния модели.
 
 ---
 
@@ -387,13 +385,17 @@ yarn build
 
 - `get orderDetails(): Order` - возвращает данные поля `_orderDetails`
 
+- `private _isValidPayment(): boolean` - возвращает `true`, если способ оплаты валиден, иначе `false`
+
+- `private _isValidAddress(): boolean` - возвращает `true`, если адрес валиден, иначе `false`
+
 - `get isValidOrder(): boolean` - возвращает `true`, если данные в `_orderDetails` валидны, иначе `false`
 
 - `get errorMessage(): string` - возвращает текст ошибки, если данные в `_orderDetails` невалидны
 
 - `reset()` - очищает данные `_orderDetails`
 
-- `#changed()` - создаёт событие `order:change`, уведомляющее об изменении состояния модели.
+- `_changed()` - создаёт событие `order:change`, уведомляющее об изменении состояния модели.
 
 ---
 
@@ -471,35 +473,45 @@ yarn build
 
 Поля:
 
-- `protected _cardImage: HTMLImageElement` - элемент с картинкой товара
-
-- `protected _cardCategory: HTMLElement` - элемент для отображения категории товара
-
 - `protected _cardTitle: HTMLElement` - элемент для отображения названия товара
 
 - `protected _cardPrice: HTMLElement` - элемент для отображения стоимости товара
-
-- `protected _cardText: HTMLElement` - элемент для отображения описания товара
-
-- `protected _actionBtn: HTMLButtonElement` - элемент кнопки действия с товаром
-
-- `protected _id: string` - id товара
 
 Методы:
 
 - `protected _getPriceText(price: number | null): string` - на основании стоиомсти товара возвращает текст для отображения
 
-- `set id(value: ProductId)` - устанавливает значение в поле `_id`
+- `set title(value: string)` - добавляет название товара в элемент `_cardTitle`
+
+- `set price(value: number)` - добавляет стоимость товара в элемент `_cardPrice`
+
+---
+
+### `ProductExtendedView<DataType>`
+
+`class ProductExtendedView<DataType> extends ProductView<DataType> implements IProductExtendedView`
+
+отвечает за отображение продукта с дополнительными полями, наследуется от класса `ProductView`, реализует интерфейс `IProductExtendedView`
+
+Дженерик `<DataType>` - тип данных продукта
+
+Конструктор:
+
+- `constructor(element: HTMLElement, events?: IEvents)` - принимает контейнер отображения в параметре `element` и опциональный объект событий `events`
+
+Поля:
+
+- `protected _cardImage: HTMLImageElement` - элемент с картинкой товара
+
+- `protected _cardCategory: HTMLElement` - элемент для отображения категории товара
+
+Методы:
 
 - `set image(src: string)` - добавляет ссылку для отображения картинки товара в элемент `_cardImage`
 
-- `set title(value: string)` - добавляет название товара в элемент `_cardTitle` и описание картинки в элемент `_cardImage`
-
 - `set category(value: string)` - добавляет категорию товара и её цвет в элемент `_cardCategory`
 
-- `set description(value: string)` - добавляет описание товара в элемент `_cardText`
-
-- `set price(value: number)` - добавляет стоимость товара в элемент `_cardPrice`
+- `set title(value: string)` - расширяет родительский сеттер `title`, добавляя alt к изображению
 
 ---
 
@@ -511,11 +523,13 @@ yarn build
 
 Конструктор:
 
-- `constructor(element: HTMLElement, events: IEvents)` - принимает контейнер отображения в параметре `element` и объект событий `events`
+- `constructor(element: HTMLElement, protected onDelete: () => void)` - принимает контейнер отображения в параметре `element` и коллбэк с логикой удаления товара из корзины `onDelete`
 
 Поля:
 
 - `protected _productIndex: HTMLElement` - элемент для отображения порядкового номера товара в корзине
+
+- `protected _actionBtn: HTMLButtonElement` - элемент кнопки удаления товара из корзины
 
 Методы:
 
@@ -525,19 +539,19 @@ yarn build
 
 ### `ProductGalleryView`
 
-`class ProductGalleryView extends ProductView<Product>`
+`class ProductGalleryView extends ProductExtended<Product>`
 
 отвечает за отображение продукта в галерее на главной странице, наследуется от класса `ProductView`
 
 Конструктор:
 
-- `constructor(element: HTMLElement, events: IEvents)` - принимает контейнер отображения в параметре `element` и объект событий `events`
+- `constructor(element: HTMLElement, protected onClick: () => void)` - принимает контейнер отображения в параметре `element` и обработчик события клика по карточки `onClick`
 
 ---
 
 ### `ProductPreviewView`
 
-`class ProductPreview extends ProductView<Product> implements IProductPreview`
+`class ProductPreview extends ProductExtended<Product> implements IProductPreview`
 
 отвечает за отображение полной информации о продукте, наследуется от класса `ProductView`, реализует интерфейс `IProductPreview`
 
@@ -545,9 +559,23 @@ yarn build
 
 - `constructor(element: HTMLElement, events: IEvents)` - принимает контейнер отображения в параметре `element` и объект событий `events`
 
+Поля:
+
+- `protected _cardText: HTMLElement` - элемент для отображения описания товара
+
+- `protected _actionBtn: HTMLButtonElement` - элемент кнопки добавления товара в корзину
+
+- `private _addToCartCallback: () => void` - коллбэк с логикой добавления товара в корзину
+
 Методы:
 
 - `set price(value: number)` - расширяет родительский `set price`, добавляя дизейбл ддя кнопки действия с товаром в случае отсутствия стоимости
+
+- `set description(value: string)` - добавляет описание товара в элемент `_cardText`
+
+- `setAddToCartCallback(callback: () => void)` - сохраняет колбэк добавления товара в корзину
+
+- `private handleAddToCart()` - обрабатывает добавление товара в корзину
 
 - `setIsDisabledAddBtn(disabled: boolean)` - добавляет дизейбл ддя кнопки действия с товаром
 
@@ -709,26 +737,26 @@ export type ProductId = string;
 export type PaymentType = 'card' | 'cash';
 
 export type Contacts = {
-  phone: string;
-  email: string;
+	phone: string;
+	email: string;
 };
 
 export type Product = {
-  id: ProductId;
-  description: string;
-  image: string;
-  title: string;
-  category: string;
-  price: number | null;
+	id: ProductId;
+	description: string;
+	image: string;
+	title: string;
+	category: string;
+	price: number | null;
 };
 
 export type CartProduct = Product & {
-  productIndex: number;
+	productIndex: number;
 };
 
 export type Order = {
-  payment: PaymentType;
-  address: string;
+	payment: PaymentType;
+	address: string;
 };
 ```
 
@@ -736,36 +764,36 @@ export type Order = {
 
 ```typescript
 export interface ICatalogModel {
-  setItems(items: Product[]): void;
-  getProduct(id: ProductId): Product;
+	setItems(items: Product[]): void;
+	getProduct(id: ProductId): Product;
 }
 
 export interface ICartModel {
-  add(id: ProductId, price: number): void;
-  remove(id: ProductId, price: number): void;
-  isItemInCart(id: ProductId): boolean;
-  reset(): void;
+	add(id: ProductId, price: number): void;
+	remove(id: ProductId, price: number): void;
+	isItemInCart(id: ProductId): boolean;
+	reset(): void;
 }
 
 export interface IUserModel {
-  address: string;
-  contacts: Contacts;
+	address: string;
+	contacts: Contacts;
 }
 
 export interface IContactsModel {
-  contacts: Contacts;
-  errorMessage: string;
-  isValidContacts: boolean;
-  isValidPhone: boolean;
-  isValidateEmail: boolean;
-  reset(): void;
+	contacts: Contacts;
+	errorMessage: string;
+	isValidContacts: boolean;
+	isValidPhone: boolean;
+	isValidateEmail: boolean;
+	reset(): void;
 }
 
 export interface IOrderModel {
-  orderDetails: Order;
-  isValidOrder: boolean;
-  errorMessage: string;
-  reset(): void;
+	orderDetails: Order;
+	isValidOrder: boolean;
+	errorMessage: string;
+	reset(): void;
 }
 ```
 
@@ -773,95 +801,97 @@ export interface IOrderModel {
 
 ```typescript
 export interface IView<DataType> {
-  render(data?: DataType): HTMLElement;
+	render(data?: DataType): HTMLElement;
 }
 
 export interface IMainPage {
-  isLocked: boolean;
+	isLocked: boolean;
 }
 
 export interface IMainPageData {
-  isLocked: boolean;
+	isLocked: boolean;
 }
 
 export interface ICatalogView {
-  updateContent(elements: HTMLElement[]): void;
+	updateContent(elements: HTMLElement[]): void;
 }
 
 export interface IProductView {
-  id: ProductId;
-  image: string;
-  title: string;
-  category: string;
-  description: string;
-  price: number;
+	title: string;
+	price: number;
 }
 
-export interface IProductCartView {
-  productIndex: number;
+export interface IProductExtendedView extends IProductView {
+	image: string;
+	category: string;
 }
 
-export interface IProductPreview {
-  setIsDisabledAddBtn(disabled: boolean): void;
+export interface IProductCartView extends IProductView {
+	productIndex: number;
+}
+
+export interface IProductPreview extends IProductExtendedView {
+	description: string;
+	setIsDisabledAddBtn(disabled: boolean): void;
 }
 
 export interface IPopupView {
-  content: HTMLElement;
-  open(): void;
-  close(): void;
+	content: HTMLElement;
+	open(): void;
+	close(): void;
 }
 
 export interface IPopupViewData {
-  content: HTMLElement;
+	content: HTMLElement;
 }
 
 export interface IForm<
-  DataType extends { inputValues: Record<string, string> }
+	DataType extends { inputValues: Record<string, string> }
 > {
-  inputValues: DataType['inputValues'];
-  errors: string;
-  setIsDisabledSubmitBtn(disabled: boolean): void;
+	inputValues: DataType['inputValues'];
+	errors: string;
+	setIsDisabledSubmitBtn(disabled: boolean): void;
 }
 
 export interface IFormData<DataType> {
-  inputValues: DataType;
+	inputValues: DataType;
 }
 
 export interface IOrderFormView {
-  payment: PaymentType;
+	payment: PaymentType;
 }
 
 export interface IOrderFormViewData extends IFormData<Pick<Order, 'address'>> {
-  payment: PaymentType;
+	payment: PaymentType;
 }
 
 export interface IContactsFormViewData extends IFormData<Contacts> {
-  inputValues: Contacts;
+	inputValues: Contacts;
 }
 
 export interface ICartCounter {
-  count: number;
+	count: number;
 }
 
 export interface ICartCounterData {
-  count: number;
+	count: number;
 }
 
 export interface ICartView extends ICartViewData {
-  setIsDisabledOrderBtn(disabled: boolean): void;
+	setIsDisabledOrderBtn(disabled: boolean): void;
 }
 
 export interface ICartViewData {
-  cartItems: HTMLElement[];
-  totalPrice: number;
+	cartItems: HTMLElement[];
+	totalPrice: number;
 }
 
 export interface ISuccess {
-  totalPrice: number;
+	totalPrice: number;
 }
 
 export interface ISuccessData {
-  totalPrice: number;
+	totalPrice: number;
 }
 ```
 
@@ -869,22 +899,22 @@ export interface ISuccessData {
 
 ```typescript
 export type CreateOrderRequest = {
-  payment: PaymentType;
-  email: string;
-  phone: string;
-  address: string;
-  total: number;
-  items: ProductId[];
+	payment: PaymentType;
+	email: string;
+	phone: string;
+	address: string;
+	total: number;
+	items: ProductId[];
 };
 
 export type CreateOrderResponse = {
-  id: string;
-  total: number;
+	id: string;
+	total: number;
 };
 
 export interface IWebLarekApi {
-  getProductById: (id: Product['id']) => Promise<Product>;
-  getProductList: () => Promise<Product[]>;
-  createOrder: (order: CreateOrderRequest) => Promise<CreateOrderResponse>;
+	getProductById: (id: Product['id']) => Promise<Product>;
+	getProductList: () => Promise<Product[]>;
+	createOrder: (order: CreateOrderRequest) => Promise<CreateOrderResponse>;
 }
 ```

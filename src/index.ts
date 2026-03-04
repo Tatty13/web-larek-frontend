@@ -87,30 +87,15 @@ api
 	.then(catalogModel.setItems.bind(catalogModel))
 	.catch((err: Error) => console.log(err));
 
-const setCartPopupContent = () => {
-	const cartItems = cartModel.itemsIds.map((id, idx) => {
-		const product = catalogModel.getProduct(id);
-		const productElement = new ProductCartView(
-			cloneTemplate(cardBasketTemplate),
-			events
-		);
-
-		return productElement.render({ ...product, productIndex: idx + 1 });
-	});
-
-	popup.content = cartView.render({
-		cartItems,
-		totalPrice: cartModel.totalPrice,
-	});
-};
-
 events.on<{ items: Product[] }>(
 	EventTypes.Catalog.change,
 	({ items }: { items: Product[] }) => {
 		const productCards = items.map((item) => {
 			const productCard = new ProductGalleryView(
 				cloneTemplate(catalogCardTemplate),
-				events
+				() => {
+					events.emit(EventTypes.Product.getDetails, { id: item.id });
+				}
 			);
 			return productCard.render(item);
 		});
@@ -123,6 +108,13 @@ events.on<{ id: ProductId }>(EventTypes.Product.getDetails, ({ id }) => {
 	const product = catalogModel.getProduct(id);
 	const isProductInCart = cartModel.isItemInCart(id);
 	productPreview.setIsDisabledAddBtn(isProductInCart);
+
+	if (!isProductInCart) {
+		productPreview.setAddToCartCallback(() => {
+			events.emit(EventTypes.Cart.add, { id });
+		});
+	}
+
 	const productPreviewElement = productPreview.render(product);
 	popup.content = productPreviewElement;
 	popup.open();
@@ -143,16 +135,32 @@ events.on<{ id: ProductId }>(EventTypes.Cart.add, ({ id }) => {
 events.on<{ id: ProductId }>(EventTypes.Cart.remove, ({ id }) => {
 	const product = catalogModel.getProduct(id);
 	cartModel.remove(id, product.price);
-	setCartPopupContent();
 });
 
-events.on(EventTypes.Cart.change, () => {
+events.on<{ items: ProductId[] }>(EventTypes.Cart.change, ({ items }) => {
 	cartCounter.render({ count: cartModel.itemsCount });
 	cartView.setIsDisabledOrderBtn(!cartModel.itemsCount);
+
+	const cartItems = items.map((id, idx) => {
+		const product = catalogModel.getProduct(id);
+		const productElement = new ProductCartView(
+			cloneTemplate(cardBasketTemplate),
+			() => {
+				events.emit(EventTypes.Cart.remove, { id });
+			}
+		);
+
+		return productElement.render({ ...product, productIndex: idx + 1 });
+	});
+
+	cartView.render({
+		cartItems,
+		totalPrice: cartModel.totalPrice,
+	});
 });
 
 events.on(EventTypes.Cart.open, () => {
-	setCartPopupContent();
+	popup.content = cartView.render();
 	popup.open();
 });
 

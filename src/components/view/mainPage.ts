@@ -12,8 +12,6 @@ export class MainPage extends BaseView<IMainPageData> implements IMainPage {
 	}
 
 	set isLocked(value: boolean) {
-		value
-			? this._pageWrapper.classList.add('page__wrapper_locked')
-			: this._pageWrapper.classList.remove('page__wrapper_locked');
+		this._pageWrapper.classList.toggle('page__wrapper_locked', value);
 	}
 }

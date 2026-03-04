@@ -11,15 +11,15 @@ export class CatalogModel implements ICatalogModel {
 
 	setItems(items: Product[]) {
 		this._items = items;
-		this.#changed();
+		this._changed();
 	}
 
-	getProduct(id: ProductId): Product {
+	getProduct(id: ProductId): Product | null {
 		if (!this._items) return null;
-		return this._items.find((item) => item.id === id);
+		return this._items.find((item) => item.id === id) || null;
 	}
 
-	#changed() {
+	_changed() {
 		this.events.emit(EventTypes.Catalog.change, {
 			items: this._items,
 		});

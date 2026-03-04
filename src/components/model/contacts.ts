@@ -19,7 +19,7 @@ export class ContactsModel implements IContactsModel {
 			...details,
 		};
 
-		this.#changed();
+		this._changed();
 	}
 
 	get contacts(): Contacts {
@@ -63,10 +63,10 @@ export class ContactsModel implements IContactsModel {
 			email: '',
 			phone: '',
 		};
-		this.#changed();
+		this._changed();
 	}
 
-	#changed() {
+	_changed() {
 		this.events.emit(EventTypes.Contacts.change, {
 			items: this._contacts,
 		});

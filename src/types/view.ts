@@ -1,4 +1,4 @@
-import { Contacts, Order, PaymentType, ProductId } from './common';
+import { Contacts, Order, PaymentType } from './common';
 
 export interface IView<DataType> {
 	render(data?: DataType): HTMLElement;
@@ -17,19 +17,21 @@ export interface ICatalogView {
 }
 
 export interface IProductView {
-	id: ProductId;
-	image: string;
 	title: string;
-	category: string;
-	description: string;
 	price: number;
 }
 
-export interface IProductCartView {
+export interface IProductExtendedView extends IProductView {
+	image: string;
+	category: string;
+}
+
+export interface IProductCartView extends IProductView {
 	productIndex: number;
 }
 
-export interface IProductPreview {
+export interface IProductPreview extends IProductExtendedView {
+	description: string;
 	setIsDisabledAddBtn(disabled: boolean): void;
 }
 

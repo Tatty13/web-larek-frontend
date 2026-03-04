@@ -18,7 +18,7 @@ export class OrderModel implements IOrderModel {
 			...details,
 		};
 
-		this.#changed();
+		this._changed();
 	}
 
 	get orderDetails(): Order {
@@ -26,19 +26,25 @@ export class OrderModel implements IOrderModel {
 	}
 
 	get isValidOrder(): boolean {
-		return (
-			Boolean(this._orderDetails.payment) && Boolean(this._orderDetails.address)
-		);
+		return this._isValidPayment() && this._isValidAddress();
 	}
 
 	get errorMessage(): string {
-		if (!this._orderDetails.address) {
+		if (!this._isValidAddress()) {
 			return 'Введите адрес доставки';
 		}
-		if (!this._orderDetails.payment) {
+		if (!this._isValidPayment()) {
 			return 'Выберете способ доставки';
 		}
 		return '';
+	}
+
+	private _isValidPayment(): boolean {
+		return Boolean(this._orderDetails.payment);
+	}
+
+	private _isValidAddress(): boolean {
+		return Boolean(this._orderDetails.address);
 	}
 
 	reset() {
@@ -46,10 +52,10 @@ export class OrderModel implements IOrderModel {
 			address: '',
 			payment: undefined,
 		};
-		this.#changed();
+		this._changed();
 	}
 
-	#changed() {
+	_changed() {
 		this.events.emit(EventTypes.Order.change, {
 			items: this._orderDetails,
 		});

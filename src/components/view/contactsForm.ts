@@ -5,7 +5,7 @@ import { IEvents } from '../base/events';
 import { Form } from '../base/form';
 
 export class ContactsFormView extends Form<IContactsFormViewData> {
-	constructor(protected element: HTMLFormElement, protected events?: IEvents) {
+	constructor(element: HTMLFormElement, events?: IEvents) {
 		super(element, events);
 
 		this.element.addEventListener('submit', (evt) => {

@@ -11,7 +11,7 @@ export class Form<DataType extends { inputValues: Record<string, string> }>
 	protected _submitBtn: HTMLButtonElement;
 	protected _errors: HTMLElement;
 
-	constructor(protected element: HTMLFormElement, protected events?: IEvents) {
+	constructor(element: HTMLFormElement, events?: IEvents) {
 		super(element, events);
 
 		this._submitBtn = element.querySelector('button[type="submit"]');
